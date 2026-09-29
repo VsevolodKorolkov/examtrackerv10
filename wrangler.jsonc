@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "examtracker",
+  "compatibility_date": "2026-09-29",
+  "pages_build_output_dir": ".",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "userdb",
+      "database_id": "6093c989-96e4-4d6c-8582-606142bfa3aa"
+    }
+  ]
+}

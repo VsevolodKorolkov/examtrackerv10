@@ -64,7 +64,7 @@
       <div class="auth-error" id="signupError"></div>
     </form>
 
-    <p class="auth-note">Your account and exam progress are stored securely in Supabase, so you can use the tracker from different devices.</p>
+    <p class="auth-note">Your account and progress are saved in Cloudflare D1 so you can return from another device.</p>
   </div>
 </div>
 
@@ -114,30 +114,7 @@
 <div class="modal-bg" id="modal"><div class="modal"><h3>Clear all progress?</h3><p class="sub">Are you sure you want to clear all progress? This action resets all statuses and removes saved data.</p><div class="actions"><button class="outline" id="cancel">Cancel</button><button class="danger" id="confirm">Clear Progress</button></div></div></div>
 
 
-<script src="supabase-config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/*
-  Advanced Exam Tracker
-  Supabase edition
-
-  IMPORTANT:
-  Put your Supabase Project URL and Publishable/Anon key in supabase-config.js.
-  Never put a Supabase secret/service_role key in this browser app.
-*/
-
-const SUPABASE_URL = window.EXAMTRACKER_SUPABASE_URL || 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY = window.EXAMTRACKER_SUPABASE_KEY || 'YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY';
-
-const supabaseReady =
-  SUPABASE_URL.startsWith('https://') &&
-  !SUPABASE_URL.includes('YOUR_SUPABASE') &&
-  !SUPABASE_KEY.includes('YOUR_SUPABASE');
-
-const sb = supabaseReady
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-  : null;
-
 const DAY=86400000;
 const DECAY=14*DAY;
 
@@ -149,465 +126,154 @@ const highWeight = new Set([
  'Approaches to scheduling','Multitasking and resource allocation',
  'K- Maps','Logic gates','Binary','Cache, GPU, CPU, Bus','CPU'
 ]);
-
 const mediumWeight = new Set([
  'Database - Supabase','Swapping Arrays','B2: Introduction to Programming','Decomp and flowcharts',
- 'Compare Networking models','Function of servers',
- 'Quantization','Audio Representation','Images representation','Cloud Computing','Compression',
- 'Internal and External, SSD HDD','RAM and ROM','OS and Application software',
+ 'Compare Networking models','Function of servers','Quantization','Audio Representation','Images representation',
+ 'Cloud Computing','Compression','Internal and External, SSD HDD','RAM and ROM','OS and Application software',
  'Comments, Output & Numeric Data Types, If Statements & Operators'
 ]);
-
 function weightFor(name){ if(highWeight.has(name)) return 5; if(mediumWeight.has(name)) return 4; return 2; }
 
 const base=[
- ['A3 Databases','SQL'],
- ['A3 Databases','Database - Supabase'],
- ['A3 Databases','Database Schema'],
+ ['A3 Databases','SQL'],['A3 Databases','Database - Supabase'],['A3 Databases','Database Schema'],
  ['A3 Databases','A3.1.1 Explain the features, benefits and limitations of a relational database'],
- ['Theme B : Programming','File Processing Operations (SL & HL)'],
- ['Theme B : Programming','Stacks (SL & HL)'],
- ['Theme B : Programming','Recursion, stack behavior, and tracing (SL & HL)'],
- ['Theme B : Programming','2D Arrays'],
- ['Theme B : Programming','Bubble Sorting'],
- ['Theme B : Programming','Selection sorting'],
- ['Theme B : Programming','Binary Search'],
- ['Theme B : Programming','Swapping Arrays'],
- ['Theme B : Programming','Comments, Output & Numeric Data Types, If Statements & Operators'],
- ['Theme B : Programming','B2: Introduction to Programming'],
- ['Theme B : Programming','Decomp and flowcharts'],
- ['A.2 Networks','Network segmentation'],
- ['A.2 Networks','Compare Networking models'],
- ['A.2 Networks','Function of servers'],
- ['A.2 Networks','Network Introduction, Protocols and Architecture'],
- ['A.1 Computer fundamentals','Approaches to scheduling'],
- ['A.1 Computer fundamentals','Multitasking and resource allocation'],
- ['A.1 Computer fundamentals','Quantization'],
- ['A.1 Computer fundamentals','Audio Representation'],
- ['A.1 Computer fundamentals','Images representation'],
- ['A.1 Computer fundamentals','K- Maps'],
- ['A.1 Computer fundamentals','Cloud Computing'],
- ['A.1 Computer fundamentals','Compression'],
- ['A.1 Computer fundamentals','Internal and External, SSD HDD'],
- ['A.1 Computer fundamentals','Cache, GPU, CPU, Bus'],
- ['A.1 Computer fundamentals','Logic gates'],
- ['A.1 Computer fundamentals','Binary'],
- ['A.1 Computer fundamentals','OS and Application software'],
- ['A.1 Computer fundamentals','RAM and ROM'],
- ['A.1 Computer fundamentals','CPU']
+ ['Theme B : Programming','File Processing Operations (SL & HL)'],['Theme B : Programming','Stacks (SL & HL)'],
+ ['Theme B : Programming','Recursion, stack behavior, and tracing (SL & HL)'],['Theme B : Programming','2D Arrays'],
+ ['Theme B : Programming','Bubble Sorting'],['Theme B : Programming','Selection sorting'],['Theme B : Programming','Binary Search'],
+ ['Theme B : Programming','Swapping Arrays'],['Theme B : Programming','Comments, Output & Numeric Data Types, If Statements & Operators'],
+ ['Theme B : Programming','B2: Introduction to Programming'],['Theme B : Programming','Decomp and flowcharts'],
+ ['A.2 Networks','Network segmentation'],['A.2 Networks','Compare Networking models'],['A.2 Networks','Function of servers'],
+ ['A.2 Networks','Network Introduction, Protocols and Architecture'],['A.1 Computer fundamentals','Approaches to scheduling'],
+ ['A.1 Computer fundamentals','Multitasking and resource allocation'],['A.1 Computer fundamentals','Quantization'],
+ ['A.1 Computer fundamentals','Audio Representation'],['A.1 Computer fundamentals','Images representation'],
+ ['A.1 Computer fundamentals','K- Maps'],['A.1 Computer fundamentals','Cloud Computing'],['A.1 Computer fundamentals','Compression'],
+ ['A.1 Computer fundamentals','Internal and External, SSD HDD'],['A.1 Computer fundamentals','Cache, GPU, CPU, Bus'],
+ ['A.1 Computer fundamentals','Logic gates'],['A.1 Computer fundamentals','Binary'],['A.1 Computer fundamentals','OS and Application software'],
+ ['A.1 Computer fundamentals','RAM and ROM'],['A.1 Computer fundamentals','CPU']
 ].map((x,i)=>({id:i,section:x[0],name:x[1],weight:weightFor(x[1]),status:'NotStarted',lastReviewed:null}));
 
-let data={topics:base.map(x=>({...x})),examDate:''};
-let currentSession=null;
-let usernameCache='';
+function freshData(){ return {topics:base.map(x=>({...x})), examDate:''}; }
+let data=freshData();
+let me=null;
 
-function freshData(){
- return {topics:base.map(x=>({...x})),examDate:''};
+async function api(path, options={}){
+ const response=await fetch('/api/'+path,{
+   credentials:'include',
+   headers:{'Content-Type':'application/json', ...(options.headers||{})},
+   ...options
+ });
+ let body={};
+ try{ body=await response.json(); }catch(e){}
+ if(!response.ok) throw new Error(body.error || ('Request failed: '+response.status));
+ return body;
 }
 
-function label(s){
- return {NotStarted:'Not Started',InProgress:'In Progress',NeedsReview:'Needs Review',Mastered:'Mastered'}[s]||'Not Started';
-}
-function grouped(){
- return data.topics.reduce((a,t)=>{(a[t.section]??=[]).push(t);return a;},{});
-}
+function escapeHTML(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function label(s){return {NotStarted:'Not Started',InProgress:'In Progress',NeedsReview:'Needs Review',Mastered:'Mastered'}[s]||'Not Started';}
+function grouped(){return data.topics.reduce((a,t)=>{(a[t.section]??=[]).push(t);return a;},{});}
 function decay(){
  let changed=false;
  data.topics.forEach(t=>{
-   if(t.status==='Mastered' && t.lastReviewed &&
-      Date.now()-new Date(t.lastReviewed).getTime()>DECAY){
-     t.status='NeedsReview'; changed=true;
-   }
+  if(t.status==='Mastered'&&t.lastReviewed&&Date.now()-new Date(t.lastReviewed).getTime()>DECAY){
+   t.status='NeedsReview'; changed=true;
+  }
  });
  return changed;
 }
-
 function topicHTML(list){
  const groups=list.reduce((a,t)=>{(a[t.section]??=[]).push(t);return a;},{});
  return Object.entries(groups).map(([sec,ts])=>`
-  <details class="topic-section" open>
-   <summary>${escapeHTML(sec)} <span class="sub">(${ts.length} sub-topics)</span></summary>
-   ${ts.map(t=>`<div class="topic-row">
-    <div class="topic-name"><b>${escapeHTML(t.name)}</b><small>Weight: ${t.weight}${t.lastReviewed?' · Last reviewed: '+new Date(t.lastReviewed).toLocaleDateString():''}</small></div>
-    <span class="badge ${t.status}">${label(t.status)}</span>
-    <select data-id="${t.id}">${['NotStarted','InProgress','Mastered','NeedsReview'].map(s=>`<option value="${s}" ${s===t.status?'selected':''}>${label(s)}</option>`).join('')}</select>
-   </div>`).join('')}
-  </details>`).join('') || '<p class="sub">No topics found.</p>';
+  <details class="topic-section" open><summary>${escapeHTML(sec)} <span class="sub">(${ts.length} sub-topics)</span></summary>
+  ${ts.map(t=>`<div class="topic-row"><div class="topic-name"><b>${escapeHTML(t.name)}</b><small>Weight: ${t.weight}${t.lastReviewed?' · Last reviewed: '+new Date(t.lastReviewed).toLocaleDateString():''}</small></div>
+  <span class="badge ${t.status}">${label(t.status)}</span>
+  <select data-id="${t.id}">${['NotStarted','InProgress','Mastered','NeedsReview'].map(s=>`<option value="${s}" ${s===t.status?'selected':''}>${label(s)}</option>`).join('')}</select></div>`).join('')}
+  </details>`).join('');
 }
-
-function escapeHTML(value){
- return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
 function readiness(){
  let total=0,earned=0;
- data.topics.forEach(t=>{
-   total+=Number(t.weight)||0;
-   if(t.status==='Mastered') earned+=Number(t.weight)||0;
-   if(t.status==='InProgress') earned+=(Number(t.weight)||0)*0.5;
- });
+ data.topics.forEach(t=>{total+=t.weight;if(t.status==='Mastered')earned+=t.weight;if(t.status==='InProgress')earned+=t.weight*.5;});
  return total?earned/total*100:0;
 }
-
-function leftDays(){
- return data.examDate
-   ? Math.max(0,Math.ceil((new Date(data.examDate).getTime()-Date.now())/DAY))
-   : 365;
-}
-
-function priorityTopics(){
- const d=leftDays();
- return data.topics
-   .filter(t=>t.status!=='Mastered')
-   .map(t=>({...t,score:t.weight*(1/(d+1))}))
-   .sort((a,b)=>b.score-a.score);
-}
-
-function priorityHTML(items,full=false){
- return items.slice(0,full?items.length:3).map((t,i)=>`<div class="priority">
-   <span class="rank">${i+1}</span><b>${escapeHTML(t.name)}</b>
-   <div class="sub" style="margin-left:34px">Weight: ${t.weight} · ${label(t.status)} · Score: ${t.score.toFixed(5)}</div>
- </div>`).join('') || '<p class="sub">All topics are mastered.</p>';
-}
-
+function leftDays(){return data.examDate?Math.max(0,Math.ceil((new Date(data.examDate).getTime()-Date.now())/DAY)):365;}
+function priorityTopics(){const d=leftDays();return data.topics.filter(t=>t.status!=='Mastered').map(t=>({...t,score:t.weight/(d+1)})).sort((a,b)=>b.score-a.score);}
+function priorityHTML(items,full=false){return items.slice(0,full?items.length:3).map((t,i)=>`<div class="priority"><span class="rank">${i+1}</span><b>${escapeHTML(t.name)}</b><div class="sub" style="margin-left:34px">Weight: ${t.weight} · ${label(t.status)} · Score: ${t.score.toFixed(5)}</div></div>`).join('')||'<p class="sub">All topics are mastered.</p>';}
 function countdown(){
- const els={d:document.getElementById('days'),h:document.getElementById('hours'),m:document.getElementById('mins'),s:document.getElementById('secs')};
- if(!data.examDate){
-   els.d.textContent='--';els.h.textContent='--';els.m.textContent='--';els.s.textContent='--';return;
- }
+ const els={d:days,h:hours,m:mins,s:secs};
+ if(!data.examDate){Object.values(els).forEach(e=>e.textContent='--');return;}
  let diff=new Date(data.examDate).getTime()-Date.now();
- if(diff<=0){
-   els.d.textContent='0';els.h.textContent='00';els.m.textContent='00';els.s.textContent='00';return;
- }
- const d=Math.floor(diff/DAY);diff%=DAY;
- const h=Math.floor(diff/3600000);diff%=3600000;
- const m=Math.floor(diff/60000);diff%=60000;
- const sec=Math.floor(diff/1000);
- els.d.textContent=d;els.h.textContent=String(h).padStart(2,'0');
- els.m.textContent=String(m).padStart(2,'0');els.s.textContent=String(sec).padStart(2,'0');
+ if(diff<=0){els.d.textContent='0';els.h.textContent=els.m.textContent=els.s.textContent='00';return;}
+ const d=Math.floor(diff/DAY);diff%=DAY;const h=Math.floor(diff/3600000);diff%=3600000;const m=Math.floor(diff/60000);diff%=60000;const s=Math.floor(diff/1000);
+ els.d.textContent=d;els.h.textContent=String(h).padStart(2,'0');els.m.textContent=String(m).padStart(2,'0');els.s.textContent=String(s).padStart(2,'0');
 }
-
 function bindSelects(){
- document.querySelectorAll('select[data-id]').forEach(select=>select.onchange=async()=>{
-   const t=data.topics.find(x=>String(x.id)===String(select.dataset.id));
-   if(!t)return;
-   t.status=select.value;
-   t.lastReviewed=select.value==='Mastered' ? new Date().toISOString() :
-                  select.value==='NotStarted' ? null : t.lastReviewed;
-   render();
-   await saveTopic(t);
+ document.querySelectorAll('select[data-id]').forEach(el=>el.onchange=async()=>{
+  const t=data.topics.find(x=>String(x.id)===el.dataset.id); if(!t)return;
+  t.status=el.value;
+  if(el.value==='Mastered')t.lastReviewed=new Date().toISOString();
+  if(el.value==='NotStarted')t.lastReviewed=null;
+  render();
+  try{await api('progress',{method:'POST',body:JSON.stringify({topicId:t.id,status:t.status,lastReviewed:t.lastReviewed})});}
+  catch(e){alert('Could not save progress: '+e.message);}
  });
 }
-
 function renderTopicMenu(){
- const menu=document.getElementById('topicMenu');
- menu.innerHTML=Object.keys(grouped()).map(sec=>`
-   <button type="button" class="nav-item topic-link" data-section="${escapeHTML(sec)}">› ${escapeHTML(sec.replace('Topic ','T'))}</button>
- `).join('');
- menu.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>showTopicSection(b.dataset.section));
+ topicMenu.innerHTML=Object.keys(grouped()).map(sec=>`<button type="button" class="nav-item topic-link" data-section="${escapeHTML(sec)}">› ${escapeHTML(sec.replace('Topic ','T'))}</button>`).join('');
+ topicMenu.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>showTopicSection(b.dataset.section));
 }
-
 function render(){
- const changed=decay();
- if(changed && currentSession) syncAllProgress().catch(console.error);
- const r=readiness();
- document.getElementById('ready').textContent=r.toFixed(1)+'%';
- document.getElementById('bar').style.width=r+'%';
- document.getElementById('topicsDashboard').innerHTML=topicHTML(data.topics);
- document.getElementById('topicsAll').innerHTML=topicHTML(data.topics);
- document.getElementById('priorityList').innerHTML=priorityHTML(priorityTopics());
- document.getElementById('prioritiesFull').innerHTML=priorityHTML(priorityTopics(),true);
- document.getElementById('examDate').value=data.examDate || '';
- renderTopicMenu();
- bindSelects();
- countdown();
+ const r=readiness();ready.textContent=r.toFixed(1)+'%';bar.style.width=r+'%';
+ topicsDashboard.innerHTML=topicHTML(data.topics);topicsAll.innerHTML=topicHTML(data.topics);
+ priorityList.innerHTML=priorityHTML(priorityTopics());prioritiesFull.innerHTML=priorityHTML(priorityTopics(),true);
+ examDate.value=data.examDate||'';renderTopicMenu();bindSelects();countdown();
 }
+const titles={dashboard:['Dashboard','Monitor your progress and prepare for the exam.'],topics:['All Topics','Update the status of every syllabus sub-topic.'],priorities:['Smart Priorities','Focus on the topics requiring the most attention.'],settings:['Settings & Data','Manage saved progress and reset safely.']};
+function show(v){Object.keys(titles).forEach(x=>document.getElementById(x+'View').classList.toggle('hidden',x!==v));document.querySelectorAll('.nav-item[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===v));pageTitle.textContent=titles[v][0];pageSub.textContent=titles[v][1];}
+function showTopicSection(section){show('topics');pageTitle.textContent=section;pageSub.textContent='Update the status of the sub-topics in this syllabus section.';document.querySelectorAll('#topicsAll .topic-section').forEach(el=>{el.style.display=(el.querySelector('summary')?.textContent||'').startsWith(section)?'':'none';});}
 
-const titles={
- dashboard:['Dashboard','Monitor your progress and prepare for the exam.'],
- topics:['All Topics','Update the status of every syllabus sub-topic.'],
- priorities:['Smart Priorities','Focus on the topics requiring the most attention.'],
- settings:['Settings & Data','Manage saved progress and reset safely.']
-};
-
-function show(v){
- Object.keys(titles).forEach(x=>document.getElementById(x+'View').classList.toggle('hidden',x!==v));
- document.querySelectorAll('.nav-item[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
- document.getElementById('pageTitle').textContent=titles[v][0];
- document.getElementById('pageSub').textContent=titles[v][1];
-}
-
-function showTopicSection(section){
- show('topics');
- document.getElementById('pageTitle').textContent=section;
- document.getElementById('pageSub').textContent='Update the status of the sub-topics in this syllabus section.';
- document.querySelectorAll('#topicsAll .topic-section').forEach(el=>{
-   const title=el.querySelector('summary')?.textContent||'';
-   el.style.display=title.startsWith(section)?'':'none';
- });
-}
-
-/* ---------------- Supabase data layer ---------------- */
-
-async function loadUserData(){
- if(!currentSession){
-   data=freshData();
-   return;
- }
-
- const userId=currentSession.user.id;
-
- const [{data:progress,error:progressError},{data:settings,error:settingsError}] = await Promise.all([
-   sb.from('topic_progress').select('topic_id,status,last_reviewed').eq('user_id',userId),
-   sb.from('exam_settings').select('exam_date').eq('user_id',userId).maybeSingle()
- ]);
-
- if(progressError) throw progressError;
- if(settingsError) throw settingsError;
-
- const progressMap=new Map((progress||[]).map(row=>[
-   Number(row.topic_id),
-   {status:row.status,lastReviewed:row.last_reviewed}
- ]));
-
+function showAuth(){authScreen.style.display='flex';}
+function hideAuth(){authScreen.style.display='none';}
+async function loadCloudData(){
+ const result=await api('progress');
+ const map=new Map((result.progress||[]).map(x=>[Number(x.topic_id),x]));
  data=freshData();
- data.topics=data.topics.map(t=>{
-   const p=progressMap.get(t.id);
-   return p ? {...t,status:p.status||'NotStarted',lastReviewed:p.lastReviewed||null} : t;
- });
- data.examDate=settings?.exam_date
-   ? new Date(settings.exam_date).toISOString().slice(0,16)
-   : '';
-}
-
-async function saveTopic(topic){
- if(!currentSession || !sb) return;
- const {error}=await sb.from('topic_progress').upsert({
-   user_id:currentSession.user.id,
-   topic_id:topic.id,
-   status:topic.status,
-   last_reviewed:topic.lastReviewed
- },{onConflict:'user_id,topic_id'});
- if(error){
-   console.error(error);
-   alert('Could not save this topic to Supabase: '+error.message);
- }
-}
-
-async function syncAllProgress(){
- if(!currentSession || !sb) return;
- const rows=data.topics.map(t=>({
-   user_id:currentSession.user.id,
-   topic_id:t.id,
-   status:t.status,
-   last_reviewed:t.lastReviewed
- }));
- const {error}=await sb.from('topic_progress').upsert(rows,{onConflict:'user_id,topic_id'});
- if(error) console.error('Progress sync failed:',error);
-}
-
-async function saveExamDate(){
- if(!currentSession || !sb) return;
- const dateValue=document.getElementById('examDate').value;
- const {error}=await sb.from('exam_settings').upsert({
-   user_id:currentSession.user.id,
-   exam_date:dateValue ? new Date(dateValue).toISOString() : null
- },{onConflict:'user_id'});
- if(error){
-   console.error(error);
-   alert('Could not save the exam date: '+error.message);
- }
-}
-
-async function resetProgress(){
- data=freshData();
- if(currentSession && sb){
-   const userId=currentSession.user.id;
-   const [{error:e1},{error:e2}]=await Promise.all([
-     sb.from('topic_progress').delete().eq('user_id',userId),
-     sb.from('exam_settings').upsert({user_id:userId,exam_date:null},{onConflict:'user_id'})
-   ]);
-   if(e1 || e2){
-     alert('Supabase reset failed. Please check your database policies.');
-     console.error(e1||e2);
-   }
- }
+ data.topics=data.topics.map(t=>{const p=map.get(t.id);return p?{...t,status:p.status,lastReviewed:p.last_reviewed}:t;});
+ data.examDate=result.examDate?new Date(result.examDate).toISOString().slice(0,16):'';
  render();
- show('dashboard');
 }
-
-async function updateLoggedUser(){
- const el=document.getElementById('loggedUser');
- if(!el)return;
- if(!currentSession){el.textContent='';return;}
- const {data:profile}=await sb.from('profiles').select('username').eq('id',currentSession.user.id).maybeSingle();
- usernameCache=profile?.username || currentSession.user.email || '';
- el.textContent='Logged in as: '+usernameCache;
-}
-
-async function createProfile(user, username){
- if(!sb)return;
- const {error}=await sb.from('profiles').upsert({
-   id:user.id,
-   username:username || user.email?.split('@')[0] || 'user'
- },{onConflict:'id'});
- if(error) console.error('Profile creation failed:',error);
-}
-
-/* ---------------- Authentication ---------------- */
-
-function showAuth(){
- const screen=document.getElementById('authScreen');
- if(screen) screen.style.display='flex';
-}
-function hideAuth(){
- const screen=document.getElementById('authScreen');
- if(screen) screen.style.display='none';
-}
-
-function showConfigError(){
- showAuth();
- const loginError=document.getElementById('loginError');
- loginError.textContent='Supabase is not configured yet. Add your Project URL and Publishable/Anon key to supabase-config.js.';
-}
-
-async function startAuthenticatedSession(session){
- currentSession=session;
- hideAuth();
- await loadUserData();
- await updateLoggedUser();
- render();
+async function loadSession(){
+ try{
+  const r=await api('session');
+  me=r.user;
+  loggedUser.textContent='Logged in as: '+me.email;
+  hideAuth();
+  await loadCloudData();
+ }catch(e){me=null;showAuth();}
 }
 
 document.querySelectorAll('.nav-item[data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view));
+examDate.onchange=async()=>{data.examDate=examDate.value;render();try{await api('exam-date',{method:'POST',body:JSON.stringify({examDate:data.examDate})});}catch(e){alert(e.message);}};
+clearDate.onclick=async()=>{data.examDate='';render();try{await api('exam-date',{method:'POST',body:JSON.stringify({examDate:''})});}catch(e){alert(e.message);}};
+resetBtn.onclick=()=>modal.style.display='flex';cancel.onclick=()=>modal.style.display='none';
+confirm.onclick=async()=>{try{await api('progress',{method:'DELETE'});data=freshData();modal.style.display='none';render();show('dashboard');}catch(e){alert(e.message);}};
 
-document.getElementById('examDate').onchange=async()=>{
- data.examDate=document.getElementById('examDate').value;
- render();
- await saveExamDate();
+loginTab.onclick=()=>{loginForm.classList.remove('hidden');signupForm.classList.add('hidden');loginTab.classList.add('active');signupTab.classList.remove('active');};
+signupTab.onclick=()=>{signupForm.classList.remove('hidden');loginForm.classList.add('hidden');signupTab.classList.add('active');loginTab.classList.remove('active');};
+
+signupForm.onsubmit=async(e)=>{
+ e.preventDefault();signupError.textContent='';
+ const email=signupUser.value.trim(),password=signupPass.value,confirmPass=signupPass2.value;
+ if(password.length<6){signupError.textContent='Password must contain at least 6 characters.';return;}
+ if(password!==confirmPass){signupError.textContent='Passwords do not match.';return;}
+ try{await api('signup',{method:'POST',body:JSON.stringify({email,password})});signupForm.reset();await loadSession();}
+ catch(err){signupError.textContent=err.message;}
 };
-
-const clearDateBtn=document.getElementById('clearDate');
-if(clearDateBtn){
- clearDateBtn.onclick=async()=>{
-   data.examDate='';
-   document.getElementById('examDate').value='';
-   render();
-   await saveExamDate();
- };
-}
-
-document.getElementById('resetBtn').onclick=()=>document.getElementById('modal').style.display='flex';
-document.getElementById('cancel').onclick=()=>document.getElementById('modal').style.display='none';
-document.getElementById('confirm').onclick=async()=>{
- document.getElementById('modal').style.display='none';
- await resetProgress();
+loginForm.onsubmit=async(e)=>{
+ e.preventDefault();loginError.textContent='';
+ try{await api('login',{method:'POST',body:JSON.stringify({email:loginUser.value.trim(),password:loginPass.value})});loginForm.reset();await loadSession();}
+ catch(err){loginError.textContent=err.message;}
 };
+logoutBtn.onclick=async()=>{try{await api('logout',{method:'POST',body:'{}'});}catch(e){}me=null;loggedUser.textContent='';data=freshData();render();showAuth();};
 
-document.getElementById('loginTab').onclick=()=>{
- document.getElementById('loginForm').classList.remove('hidden');
- document.getElementById('signupForm').classList.add('hidden');
- document.getElementById('loginTab').classList.add('active');
- document.getElementById('signupTab').classList.remove('active');
-};
-
-document.getElementById('signupTab').onclick=()=>{
- document.getElementById('signupForm').classList.remove('hidden');
- document.getElementById('loginForm').classList.add('hidden');
- document.getElementById('signupTab').classList.add('active');
- document.getElementById('loginTab').classList.remove('active');
-};
-
-document.getElementById('signupForm').onsubmit=async(e)=>{
- e.preventDefault();
- const email=document.getElementById('signupUser').value.trim();
- const password=document.getElementById('signupPass').value;
- const confirm=document.getElementById('signupPass2').value;
- const err=document.getElementById('signupError');
- err.textContent='';
-
- if(!sb){err.textContent='Supabase is not configured.';return;}
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){err.textContent='Please enter a valid email address.';return;}
- if(password.length<6){err.textContent='Password must contain at least 6 characters.';return;}
- if(password!==confirm){err.textContent='Passwords do not match.';return;}
-
- const {data:result,error}=await sb.auth.signUp({email,password});
- if(error){err.textContent=error.message;return;}
-
- if(result.user){
-   await createProfile(result.user,email.split('@')[0]);
- }
-
- if(result.session){
-   await startAuthenticatedSession(result.session);
-   document.getElementById('signupForm').reset();
- }else{
-   err.textContent='Account created. Check your email if email confirmation is enabled, then log in.';
-   document.getElementById('signupForm').reset();
- }
-};
-
-document.getElementById('loginForm').onsubmit=async(e)=>{
- e.preventDefault();
- const email=document.getElementById('loginUser').value.trim();
- const password=document.getElementById('loginPass').value;
- const err=document.getElementById('loginError');
- err.textContent='';
-
- if(!sb){err.textContent='Supabase is not configured.';return;}
-
- const {data:result,error}=await sb.auth.signInWithPassword({email,password});
- if(error){err.textContent=error.message;return;}
- await startAuthenticatedSession(result.session);
- document.getElementById('loginForm').reset();
-};
-
-document.getElementById('logoutBtn').onclick=async()=>{
- if(sb) await sb.auth.signOut();
- currentSession=null;
- data=freshData();
- document.getElementById('loggedUser').textContent='';
- showAuth();
-};
-
-async function init(){
- if(!sb){
-   showConfigError();
-   return;
- }
-
- const {data:{session},error}=await sb.auth.getSession();
- if(error){
-   console.error(error);
-   showAuth();
-   document.getElementById('loginError').textContent='Could not load Supabase session.';
-   return;
- }
-
- if(session){
-   try{
-     await startAuthenticatedSession(session);
-   }catch(error){
-     console.error(error);
-     showAuth();
-     document.getElementById('loginError').textContent='Could not load your saved tracker data: '+error.message;
-   }
- }else{
-   showAuth();
- }
-}
-
-sb?.auth.onAuthStateChange(async(event,session)=>{
- if(event==='SIGNED_OUT'){
-   currentSession=null;
-   showAuth();
- }else if(event==='SIGNED_IN' && session && !currentSession){
-   try{ await startAuthenticatedSession(session); }catch(e){console.error(e);}
- }
-});
-
-render();
-setInterval(()=>{countdown();decay();},1000);
-init();
+render();setInterval(countdown,1000);loadSession();
 </script>
 </body></html>
