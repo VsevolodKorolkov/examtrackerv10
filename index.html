@@ -4,9 +4,70 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Advanced Exam Tracker</title>
-<style>*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f3f3;color:#222}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:#fff;border-right:1px solid #ccc;padding:15px;position:fixed;left:0;top:0;bottom:0;overflow:auto}.brand{padding:5px 5px 15px;border-bottom:1px solid #ddd;margin-bottom:10px}.brand h1{font-size:18px;margin:0 0 5px;color:#1557a6}.brand p{font-size:12px;color:#666;margin:0}.menu-title{font-size:11px;font-weight:bold;color:#777;margin:15px 5px 6px}.nav-item{display:block;width:100%;text-align:left;background:#fff;color:#333;border:1px solid transparent;padding:9px 8px;border-radius:3px;margin:2px 0;cursor:pointer}.nav-item:hover,.nav-item.active{background:#e8f1fb;color:#1557a6;border-color:#c5d8ed}.topic-link{font-size:12px;padding-left:18px}.content{margin-left:220px;width:calc(100% - 220px);padding:20px}.topbar{border-bottom:1px solid #ccc;margin-bottom:15px;padding-bottom:10px}.topbar h2{margin:0;font-size:22px;font-weight:600}.sub{color:#666;font-size:13px;margin-top:5px}.card{background:#fff;border:1px solid #ccc;border-radius:4px;padding:16px;box-shadow:none}.stats{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px;margin-bottom:12px}.stat-label{font-size:11px;color:#666}.readiness-number{font-size:28px;color:#1557a6;font-weight:bold;margin-top:5px}.stat-value{font-size:23px;font-weight:bold;color:#1557a6;margin-top:8px}.bar-bg{height:12px;background:#ddd;border-radius:2px;overflow:hidden;margin:8px 0}.bar{height:100%;width:0;background:#2d72b8}.layout{display:grid;grid-template-columns:1fr 300px;gap:12px}.main-card{min-height:500px}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.section-head h3{margin:0;font-size:17px;font-weight:600}.criteria{font-size:10px;color:#1557a6;border:1px solid #c5d8ed;background:#f3f7fc;padding:3px 6px;border-radius:3px}.topic-section{border:1px solid #ccc;border-radius:3px;margin-bottom:8px;overflow:hidden}.topic-section summary{cursor:pointer;padding:10px;font-weight:bold;background:#f7f7f7}.topic-row{display:grid;grid-template-columns:1fr 105px 135px;gap:8px;align-items:center;padding:9px 10px;border-top:1px solid #ddd}.topic-name small{display:block;color:#777;margin-top:3px;font-size:11px}.badge{color:white;font-size:11px;text-align:center;border-radius:2px;padding:5px;font-weight:bold}.NotStarted{background:#d9534f}.InProgress{background:#e0ad00;color:#222}.Mastered{background:#4caf50}.NeedsReview{background:#e67e22}.priority{padding:10px 0;border-bottom:1px solid #ddd}.priority:last-child{border-bottom:0}.rank{display:inline-block;background:#e8f1fb;color:#1557a6;border:1px solid #c5d8ed;width:23px;height:23px;text-align:center;line-height:21px;font-weight:bold;margin-right:5px}select,input{border:1px solid #bbb;border-radius:2px;padding:8px;background:#fff;font:inherit;width:100%}button{cursor:pointer;border-radius:3px;padding:8px 11px;font-weight:normal}.primary{background:#1557a6;color:#fff;border:1px solid #10447f}.outline{background:#fff;color:#1557a6;border:1px solid #1557a6}.danger{background:#fff;color:#b52b27;border:1px solid #d9534f}.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);align-items:center;justify-content:center;padding:20px}.modal{background:#fff;border:1px solid #aaa;border-radius:3px;padding:20px;max-width:400px;width:100%}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:15px}.hidden{display:none}@media(max-width:900px){.sidebar{position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid #ccc}.app{display:block}.content{margin:0;width:100%}.stats,.layout{grid-template-columns:1fr}.topic-row{grid-template-columns:1fr}}</style>
+<style>*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f3f3;color:#222}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:#fff;border-right:1px solid #ccc;padding:15px;position:fixed;left:0;top:0;bottom:0;overflow:auto}.brand{padding:5px 5px 15px;border-bottom:1px solid #ddd;margin-bottom:10px}.brand h1{font-size:18px;margin:0 0 5px;color:#1557a6}.brand p{font-size:12px;color:#666;margin:0}.menu-title{font-size:11px;font-weight:bold;color:#777;margin:15px 5px 6px}.nav-item{display:block;width:100%;text-align:left;background:#fff;color:#333;border:1px solid transparent;padding:9px 8px;border-radius:3px;margin:2px 0;cursor:pointer}.nav-item:hover,.nav-item.active{background:#e8f1fb;color:#1557a6;border-color:#c5d8ed}.topic-link{font-size:12px;padding-left:18px}.content{margin-left:220px;width:calc(100% - 220px);padding:20px}.topbar{border-bottom:1px solid #ccc;margin-bottom:15px;padding-bottom:10px}.topbar h2{margin:0;font-size:22px;font-weight:600}.sub{color:#666;font-size:13px;margin-top:5px}.card{background:#fff;border:1px solid #ccc;border-radius:4px;padding:16px;box-shadow:none}.stats{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px;margin-bottom:12px}.stat-label{font-size:11px;color:#666}.readiness-number{font-size:28px;color:#1557a6;font-weight:bold;margin-top:5px}.stat-value{font-size:23px;font-weight:bold;color:#1557a6;margin-top:8px}.bar-bg{height:12px;background:#ddd;border-radius:2px;overflow:hidden;margin:8px 0}.bar{height:100%;width:0;background:#2d72b8}.layout{display:grid;grid-template-columns:1fr 300px;gap:12px}.main-card{min-height:500px}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.section-head h3{margin:0;font-size:17px;font-weight:600}.criteria{font-size:10px;color:#1557a6;border:1px solid #c5d8ed;background:#f3f7fc;padding:3px 6px;border-radius:3px}.topic-section{border:1px solid #ccc;border-radius:3px;margin-bottom:8px;overflow:hidden}.topic-section summary{cursor:pointer;padding:10px;font-weight:bold;background:#f7f7f7}.topic-row{display:grid;grid-template-columns:1fr 105px 135px;gap:8px;align-items:center;padding:9px 10px;border-top:1px solid #ddd}.topic-name small{display:block;color:#777;margin-top:3px;font-size:11px}.badge{color:white;font-size:11px;text-align:center;border-radius:2px;padding:5px;font-weight:bold}.NotStarted{background:#d9534f}.InProgress{background:#e0ad00;color:#222}.Mastered{background:#4caf50}.NeedsReview{background:#e67e22}.priority{padding:10px 0;border-bottom:1px solid #ddd}.priority:last-child{border-bottom:0}.rank{display:inline-block;background:#e8f1fb;color:#1557a6;border:1px solid #c5d8ed;width:23px;height:23px;text-align:center;line-height:21px;font-weight:bold;margin-right:5px}select,input{border:1px solid #bbb;border-radius:2px;padding:8px;background:#fff;font:inherit;width:100%}button{cursor:pointer;border-radius:3px;padding:8px 11px;font-weight:normal}.primary{background:#1557a6;color:#fff;border:1px solid #10447f}.outline{background:#fff;color:#1557a6;border:1px solid #1557a6}.danger{background:#fff;color:#b52b27;border:1px solid #d9534f}.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);align-items:center;justify-content:center;padding:20px}.modal{background:#fff;border:1px solid #aaa;border-radius:3px;padding:20px;max-width:400px;width:100%}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:15px}.hidden{display:none}@media(max-width:900px){.sidebar{position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid #ccc}.app{display:block}.content{margin:0;width:100%}.stats,.layout{grid-template-columns:1fr}.topic-row{grid-template-columns:1fr}}
+/* Simple local login screen */
+#authScreen{
+  position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+  background:#f3f3f3;
+}
+.auth-box{
+  width:360px; max-width:calc(100% - 30px); background:#fff; border:1px solid #ccc;
+  border-radius:4px; padding:24px; box-shadow:none;
+}
+.auth-box h1{font-size:22px;color:#1557a6;margin:0 0 5px}
+.auth-box .auth-sub{font-size:13px;color:#666;margin:0 0 18px}
+.auth-tabs{display:flex;border-bottom:1px solid #ddd;margin-bottom:16px}
+.auth-tab{
+  flex:1;padding:9px;border:0;border-bottom:2px solid transparent;background:#fff;
+  color:#666;cursor:pointer;font-weight:bold
+}
+.auth-tab.active{color:#1557a6;border-bottom-color:#1557a6}
+.auth-form label{display:block;font-size:12px;color:#555;margin:10px 0 5px}
+.auth-form input{width:100%;padding:9px;border:1px solid #bbb;border-radius:2px}
+.auth-form button{width:100%;margin-top:16px}
+.auth-error{font-size:12px;color:#b52b27;margin-top:10px;min-height:16px}
+.auth-note{font-size:11px;color:#777;margin-top:14px;line-height:1.4}
+.user-bar{
+  display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:10px;
+  font-size:12px;color:#666
+}
+.user-bar button{padding:5px 9px}
+</style>
 </head>
 <body>
+<div id="authScreen">
+  <div class="auth-box">
+    <h1>Exam Tracker</h1>
+    <p class="auth-sub">Log in to continue</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="loginTab" type="button">Log In</button>
+      <button class="auth-tab" id="signupTab" type="button">Sign Up</button>
+    </div>
+
+    <form class="auth-form" id="loginForm">
+      <label for="loginUser">Username</label>
+      <input id="loginUser" type="text" autocomplete="username" required>
+      <label for="loginPass">Password</label>
+      <input id="loginPass" type="password" autocomplete="current-password" required>
+      <button class="primary" type="submit">Log In</button>
+      <div class="auth-error" id="loginError"></div>
+    </form>
+
+    <form class="auth-form hidden" id="signupForm">
+      <label for="signupUser">Username</label>
+      <input id="signupUser" type="text" autocomplete="username" required>
+      <label for="signupPass">Password</label>
+      <input id="signupPass" type="password" autocomplete="new-password" minlength="4" required>
+      <label for="signupPass2">Confirm Password</label>
+      <input id="signupPass2" type="password" autocomplete="new-password" minlength="4" required>
+      <button class="primary" type="submit">Create Account</button>
+      <div class="auth-error" id="signupError"></div>
+    </form>
+
+    <p class="auth-note">Your account and progress are saved in this browser so you can return to the tracker later.</p>
+  </div>
+</div>
+
 <div class="app">
 <aside class="sidebar">
  <div class="brand"><h1>Advanced Exam Tracker</h1><p>IB Computer Science Revision System</p></div>
@@ -21,6 +82,10 @@
 </aside>
 
 <main class="content">
+  <div class="user-bar">
+    <span id="loggedUser"></span>
+    <button id="logoutBtn" class="outline" type="button">Log Out</button>
+  </div>
  <div class="topbar"><div><h2 id="pageTitle">Dashboard</h2><div class="sub" id="pageSub">Monitor your progress and prepare for the exam.</div></div></div>
 
  <section id="dashboardView">
@@ -226,12 +291,114 @@ function showTopicSection(section){
 
 document.querySelectorAll('.nav-item[data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view));
 document.getElementById('examDate').onchange=e=>{data.examDate=e.target.value;save();render();};
-document.getElementById('clearDate').onclick=()=>{data.examDate='';save();document.getElementById('examDate').value='';countdown();};
+const clearDateBtn=document.getElementById('clearDate');
+if(clearDateBtn){
+  clearDateBtn.onclick=()=>{
+    data.examDate='';
+    save();
+    document.getElementById('examDate').value='';
+    countdown();
+  };
+}
 document.getElementById('resetBtn').onclick=()=>document.getElementById('modal').style.display='flex';
 document.getElementById('cancel').onclick=()=>document.getElementById('modal').style.display='none';
 document.getElementById('confirm').onclick=()=>{data=freshData();save();document.getElementById('modal').style.display='none';render();show('dashboard');};
 
 render();
 setInterval(()=>{countdown();decay();},1000);
+
+/* Local browser authentication.
+   This is suitable for a school/demo project, not for real secure accounts. */
+const AUTH_KEY = 'AET_accounts_local';
+const SESSION_KEY = 'AET_session_local';
+
+function getAccounts(){
+  try { return JSON.parse(localStorage.getItem(AUTH_KEY) || '{}'); }
+  catch(e){ return {}; }
+}
+function saveAccounts(accounts){
+  try { localStorage.setItem(AUTH_KEY, JSON.stringify(accounts)); return true; }
+  catch(e){ return false; }
+}
+function showAuth(){
+  const screen=document.getElementById('authScreen');
+  if(screen) screen.style.display='flex';
+}
+function hideAuth(){
+  const screen=document.getElementById('authScreen');
+  if(screen) screen.style.display='none';
+}
+function currentUser(){
+  return localStorage.getItem(SESSION_KEY) || '';
+}
+function startSession(username){
+  localStorage.setItem(SESSION_KEY, username);
+  hideAuth();
+  const el=document.getElementById('loggedUser');
+  if(el) el.textContent='Logged in as: '+username;
+}
+function loadSession(){
+  const user=currentUser();
+  if(user){ startSession(user); } else { showAuth(); }
+}
+
+document.getElementById('loginTab').onclick=()=>{
+  document.getElementById('loginForm').classList.remove('hidden');
+  document.getElementById('signupForm').classList.add('hidden');
+  document.getElementById('loginTab').classList.add('active');
+  document.getElementById('signupTab').classList.remove('active');
+};
+document.getElementById('signupTab').onclick=()=>{
+  document.getElementById('signupForm').classList.remove('hidden');
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('signupTab').classList.add('active');
+  document.getElementById('loginTab').classList.remove('active');
+};
+
+document.getElementById('signupForm').onsubmit=(e)=>{
+  e.preventDefault();
+  const username=document.getElementById('signupUser').value.trim();
+  const password=document.getElementById('signupPass').value;
+  const confirm=document.getElementById('signupPass2').value;
+  const err=document.getElementById('signupError');
+  const accounts=getAccounts();
+
+  if(username.length<3){err.textContent='Username must contain at least 3 characters.';return;}
+  if(password.length<4){err.textContent='Password must contain at least 4 characters.';return;}
+  if(password!==confirm){err.textContent='Passwords do not match.';return;}
+  if(accounts[username]){err.textContent='This username already exists.';return;}
+
+  accounts[username]={password:password, createdAt:Date.now()};
+  saveAccounts(accounts);
+  startSession(username);
+  document.getElementById('signupForm').reset();
+};
+
+document.getElementById('loginForm').onsubmit=(e)=>{
+  e.preventDefault();
+  const username=document.getElementById('loginUser').value.trim();
+  const password=document.getElementById('loginPass').value;
+  const accounts=getAccounts();
+  const err=document.getElementById('loginError');
+
+  if(!accounts[username] || accounts[username].password!==password){
+    err.textContent='Incorrect username or password.';
+    return;
+  }
+  err.textContent='';
+  startSession(username);
+  document.getElementById('loginForm').reset();
+};
+
+document.getElementById('logoutBtn').onclick=()=>{
+  localStorage.removeItem(SESSION_KEY);
+  showAuth();
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+};
+
+/* Run after the page's existing app code is loaded. */
+setTimeout(loadSession,0);
+
 </script>
 </body></html>
