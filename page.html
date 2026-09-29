@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Exam Tracker</title>
+<style>*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f3f3;color:#222}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:#fff;border-right:1px solid #ccc;padding:15px;position:fixed;left:0;top:0;bottom:0;overflow:auto}.brand{padding:5px 5px 15px;border-bottom:1px solid #ddd;margin-bottom:10px}.brand h1{font-size:18px;margin:0 0 5px;color:#1557a6}.brand p{font-size:12px;color:#666;margin:0}.menu-title{font-size:11px;font-weight:bold;color:#777;margin:15px 5px 6px}.nav-item{display:block;width:100%;text-align:left;background:#fff;color:#333;border:1px solid transparent;padding:9px 8px;border-radius:3px;margin:2px 0;cursor:pointer}.nav-item:hover,.nav-item.active{background:#e8f1fb;color:#1557a6;border-color:#c5d8ed}.topic-link{font-size:12px;padding-left:18px}.content{margin-left:220px;width:calc(100% - 220px);padding:20px}.topbar{border-bottom:1px solid #ccc;margin-bottom:15px;padding-bottom:10px}.topbar h2{margin:0;font-size:22px;font-weight:600}.sub{color:#666;font-size:13px;margin-top:5px}.card{background:#fff;border:1px solid #ccc;border-radius:4px;padding:16px;box-shadow:none}.stats{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px;margin-bottom:12px}.stat-label{font-size:11px;color:#666}.readiness-number{font-size:28px;color:#1557a6;font-weight:bold;margin-top:5px}.stat-value{font-size:23px;font-weight:bold;color:#1557a6;margin-top:8px}.bar-bg{height:12px;background:#ddd;border-radius:2px;overflow:hidden;margin:8px 0}.bar{height:100%;width:0;background:#2d72b8}.layout{display:grid;grid-template-columns:1fr 300px;gap:12px}.main-card{min-height:500px}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.section-head h3{margin:0;font-size:17px;font-weight:600}.criteria{font-size:10px;color:#1557a6;border:1px solid #c5d8ed;background:#f3f7fc;padding:3px 6px;border-radius:3px}.topic-section{border:1px solid #ccc;border-radius:3px;margin-bottom:8px;overflow:hidden}.topic-section summary{cursor:pointer;padding:10px;font-weight:bold;background:#f7f7f7}.topic-row{display:grid;grid-template-columns:1fr 105px 135px;gap:8px;align-items:center;padding:9px 10px;border-top:1px solid #ddd}.topic-name small{display:block;color:#777;margin-top:3px;font-size:11px}.badge{color:white;font-size:11px;text-align:center;border-radius:2px;padding:5px;font-weight:bold}.NotStarted{background:#d9534f}.InProgress{background:#e0ad00;color:#222}.Mastered{background:#4caf50}.NeedsReview{background:#e67e22}.priority{padding:10px 0;border-bottom:1px solid #ddd}.priority:last-child{border-bottom:0}.rank{display:inline-block;background:#e8f1fb;color:#1557a6;border:1px solid #c5d8ed;width:23px;height:23px;text-align:center;line-height:21px;font-weight:bold;margin-right:5px}select,input{border:1px solid #bbb;border-radius:2px;padding:8px;background:#fff;font:inherit;width:100%}button{cursor:pointer;border-radius:3px;padding:8px 11px;font-weight:normal}.primary{background:#1557a6;color:#fff;border:1px solid #10447f}.outline{background:#fff;color:#1557a6;border:1px solid #1557a6}.danger{background:#fff;color:#b52b27;border:1px solid #d9534f}.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);align-items:center;justify-content:center;padding:20px}.modal{background:#fff;border:1px solid #aaa;border-radius:3px;padding:20px;max-width:400px;width:100%}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:15px}.hidden{display:none}@media(max-width:900px){.sidebar{position:static;width:100%;height:auto;border-right:0;border-bottom:1px solid #ccc}.app{display:block}.content{margin:0;width:100%}.stats,.layout{grid-template-columns:1fr}.topic-row{grid-template-columns:1fr}}
+/* Simple local login screen */
+#authScreen{
+  position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+  background:#f3f3f3;
+}
+.auth-box{
+  width:360px; max-width:calc(100% - 30px); background:#fff; border:1px solid #ccc;
+  border-radius:4px; padding:24px; box-shadow:none;
+}
+.auth-box h1{font-size:22px;color:#1557a6;margin:0 0 5px}
+.auth-box .auth-sub{font-size:13px;color:#666;margin:0 0 18px}
+.auth-tabs{display:flex;border-bottom:1px solid #ddd;margin-bottom:16px}
+.auth-tab{
+  flex:1;padding:9px;border:0;border-bottom:2px solid transparent;background:#fff;
+  color:#666;cursor:pointer;font-weight:bold
+}
+.auth-tab.active{color:#1557a6;border-bottom-color:#1557a6}
+.auth-form label{display:block;font-size:12px;color:#555;margin:10px 0 5px}
+.auth-form input{width:100%;padding:9px;border:1px solid #bbb;border-radius:2px}
+.auth-form button{width:100%;margin-top:16px}
+.auth-error{font-size:12px;color:#b52b27;margin-top:10px;min-height:16px}
+.auth-note{font-size:11px;color:#777;margin-top:14px;line-height:1.4}
+.user-bar{
+  display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:10px;
+  font-size:12px;color:#666
+}
+.user-bar button{padding:5px 9px}
+</style>
+</head>
+<body>
+<div id="authScreen">
+  <div class="auth-box">
+    <h1>Exam Tracker</h1>
+    <p class="auth-sub">Log in to continue</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="loginTab" type="button">Log In</button>
+      <button class="auth-tab" id="signupTab" type="button">Sign Up</button>
+    </div>
+
+    <form class="auth-form" id="loginForm">
+      <label for="loginUser">Username</label>
+      <input id="loginUser" type="text" autocomplete="username" minlength="3" maxlength="64" autocapitalize="none" spellcheck="false" required>
+      <label for="loginPass">Password</label>
+      <input id="loginPass" type="password" autocomplete="current-password" required>
+      <button class="primary" type="submit">Log In</button>
+      <div class="auth-error" id="loginError"></div>
+    </form>
+
+    <form class="auth-form hidden" id="signupForm">
+      <label for="signupUser">Username</label>
+      <input id="signupUser" type="text" autocomplete="username" minlength="3" maxlength="64" autocapitalize="none" spellcheck="false" required>
+      <label for="signupPass">Password</label>
+      <input id="signupPass" type="password" autocomplete="new-password" minlength="15" maxlength="128" required>
+      <label for="signupPass2">Confirm Password</label>
+      <input id="signupPass2" type="password" autocomplete="new-password" minlength="15" maxlength="128" required>
+      <button class="primary" type="submit">Create Account</button>
+      <div class="auth-error" id="signupError"></div>
+    </form>
+
+    <p class="auth-note">Your account and progress are saved online and available on your other devices. Use a password of at least 15 characters.</p>
+  </div>
+</div>
+
+<div class="app">
+<aside class="sidebar">
+ <div class="brand"><h1>Advanced Exam Tracker</h1><p>IB Computer Science Revision System</p></div>
+ <div class="menu-title">NAVIGATION</div>
+ <button class="nav-item active" data-view="dashboard">▦ Dashboard</button>
+ <button class="nav-item" data-view="topics">▤ All Topics</button>
+ <button class="nav-item" data-view="priorities">★ Smart Priorities</button>
+ <div class="menu-title">SYLLABUS TOPICS</div>
+ <div id="topicMenu"></div>
+ <div class="menu-title">DATA</div>
+ <button class="nav-item" data-view="settings">⚙ Settings & Reset</button>
+</aside>
+
+<main class="content">
+  <div class="user-bar">
+    <span id="loggedUser"></span>
+    <button id="logoutBtn" class="outline" type="button">Log Out</button>
+  </div>
+ <div class="topbar"><div><h2 id="pageTitle">Dashboard</h2><div class="sub" id="pageSub">Monitor your progress and prepare for the exam.</div></div></div>
+
+ <section id="dashboardView">
+  <div class="stats">
+   <div class="card"><div class="stat-label">OVERALL READINESS · SC2</div><div class="readiness-number" id="ready">0%</div><div class="bar-bg"><div class="bar" id="bar"></div></div><div class="stat-label">Weighted progress calculated in real time</div></div>
+   <div class="card"><div class="stat-label">DAYS LEFT · SC3</div><div class="stat-value" id="days">--</div><div class="stat-label">until exam</div></div>
+   <div class="card"><div class="stat-label">HOURS</div><div class="stat-value" id="hours">--</div><div class="stat-label">live countdown</div></div>
+   <div class="card"><div class="stat-label">MINUTES</div><div class="stat-value" id="mins">--</div><div class="stat-label">live countdown</div></div>
+   <div class="card"><div class="stat-label">SECONDS</div><div class="stat-value" id="secs">--</div><div class="stat-label">live countdown</div></div>
+  </div>
+  <div class="layout">
+   <div class="card main-card"><div class="section-head"><h3>Topic Progress</h3><span class="criteria">SC1 · SC4 · SC7</span></div><div id="topicsDashboard"></div></div>
+   <div>
+    <div class="card"><div class="section-head"><h3>Top 3 to Study</h3><span class="criteria">SC5</span></div><div id="priorityList"></div></div>
+    <div class="card" style="margin-top:18px"><div class="section-head"><h3>Exam Date</h3><span class="criteria">SC3 · SC6</span></div><input id="examDate" type="datetime-local"><button id="clearDate" class="outline" style="margin-top:8px">Remove Exam Date</button><p class="sub">Your date is saved automatically to your account.</p></div>
+   </div>
+  </div>
+ </section>
+
+ <section id="topicsView" class="hidden"><div class="card"><div class="section-head"><h3>Complete Syllabus</h3><span class="criteria">SC1 · SC7</span></div><div id="topicsAll"></div></div></section>
+ <section id="prioritiesView" class="hidden"><div class="card"><div class="section-head"><h3>Smart Priority Sorting</h3><span class="criteria">SC5</span></div><p class="sub">The system ranks unmastered topics using topic weight and the remaining time until the exam. Higher-weight topics have a stronger effect on readiness and priority.</p><div id="prioritiesFull"></div></div></section>
+ <section id="settingsView" class="hidden"><div class="card"><div class="section-head"><h3>Settings & Data</h3><span class="criteria">SC6 · SC8</span></div><p>All topic statuses, review dates and your exam date are saved to your account.</p><button id="resetBtn" class="danger">Clear All Progress</button></div></section>
+</main>
+</div>
+
+<div class="modal-bg" id="modal"><div class="modal"><h3>Clear all progress?</h3><p class="sub">Are you sure you want to clear all progress? This action resets all statuses and removes saved data.</p><div class="actions"><button class="outline" id="cancel">Cancel</button><button class="danger" id="confirm">Clear Progress</button></div></div></div>
+
+
+<script>
+const DAY=86400000;
+const DECAY=14*DAY;
+
+const highWeight = new Set([
+ 'SQL','Database Schema',
+ 'File Processing Operations (SL & HL)','Stacks (SL & HL)','Recursion, stack behavior, and tracing (SL & HL)',
+ '2D Arrays','Bubble Sorting','Selection sorting','Binary Search',
+ 'Network Introduction, Protocols and Architecture','Network segmentation',
+ 'Approaches to scheduling','Multitasking and resource allocation',
+ 'K- Maps','Logic gates','Binary','Cache, GPU, CPU, Bus','CPU'
+]);
+
+const mediumWeight = new Set([
+ 'Database - Supabase','Swapping Arrays','B2: Introduction to Programming','Decomp and flowcharts',
+ 'Compare Networking models','Function of servers',
+ 'Quantization','Audio Representation','Images representation','Cloud Computing','Compression',
+ 'Internal and External, SSD HDD','RAM and ROM','OS and Application software',
+ 'Comments, Output & Numeric Data Types, If Statements & Operators'
+]);
+
+function weightFor(name){ if(highWeight.has(name)) return 5; if(mediumWeight.has(name)) return 4; return 2; }
+
+const base=[
+ ['A3 Databases','SQL'],
+ ['A3 Databases','Database - Supabase'],
+ ['A3 Databases','Database Schema'],
+ ['A3 Databases','A3.1.1 Explain the features, benefits and limitations of a relational database'],
+ ['Theme B : Programming','File Processing Operations (SL & HL)'],
+ ['Theme B : Programming','Stacks (SL & HL)'],
+ ['Theme B : Programming','Recursion, stack behavior, and tracing (SL & HL)'],
+ ['Theme B : Programming','2D Arrays'],
+ ['Theme B : Programming','Bubble Sorting'],
+ ['Theme B : Programming','Selection sorting'],
+ ['Theme B : Programming','Binary Search'],
+ ['Theme B : Programming','Swapping Arrays'],
+ ['Theme B : Programming','Comments, Output & Numeric Data Types, If Statements & Operators'],
+ ['Theme B : Programming','B2: Introduction to Programming'],
+ ['Theme B : Programming','Decomp and flowcharts'],
+ ['A.2 Networks','Network segmentation'],
+ ['A.2 Networks','Compare Networking models'],
+ ['A.2 Networks','Function of servers'],
+ ['A.2 Networks','Network Introduction, Protocols and Architecture'],
+ ['A.1 Computer fundamentals','Approaches to scheduling'],
+ ['A.1 Computer fundamentals','Multitasking and resource allocation'],
+ ['A.1 Computer fundamentals','Quantization'],
+ ['A.1 Computer fundamentals','Audio Representation'],
+ ['A.1 Computer fundamentals','Images representation'],
+ ['A.1 Computer fundamentals','K- Maps'],
+ ['A.1 Computer fundamentals','Cloud Computing'],
+ ['A.1 Computer fundamentals','Compression'],
+ ['A.1 Computer fundamentals','Internal and External, SSD HDD'],
+ ['A.1 Computer fundamentals','Cache, GPU, CPU, Bus'],
+ ['A.1 Computer fundamentals','Logic gates'],
+ ['A.1 Computer fundamentals','Binary'],
+ ['A.1 Computer fundamentals','OS and Application software'],
+ ['A.1 Computer fundamentals','RAM and ROM'],
+ ['A.1 Computer fundamentals','CPU']
+].map((x,i)=>({id:i,section:x[0],name:x[1],weight:weightFor(x[1]),status:'NotStarted',lastReviewed:null}));
+
+let data={topics:base.map(x=>({...x})),examDate:''};
+let currentSession=null;
+let usernameCache='';
+
+function freshData(){
+ return {topics:base.map(x=>({...x})),examDate:''};
+}
+
+function label(s){
+ return {NotStarted:'Not Started',InProgress:'In Progress',NeedsReview:'Needs Review',Mastered:'Mastered'}[s]||'Not Started';
+}
+function grouped(){
+ return data.topics.reduce((a,t)=>{(a[t.section]??=[]).push(t);return a;},{});
+}
+function decay(){
+ let changed=false;
+ data.topics.forEach(t=>{
+   if(t.status==='Mastered' && t.lastReviewed &&
+      Date.now()-new Date(t.lastReviewed).getTime()>DECAY){
+     t.status='NeedsReview'; changed=true;
+   }
+ });
+ return changed;
+}
+
+function topicHTML(list){
+ const groups=list.reduce((a,t)=>{(a[t.section]??=[]).push(t);return a;},{});
+ return Object.entries(groups).map(([sec,ts])=>`
+  <details class="topic-section" open>
+   <summary>${escapeHTML(sec)} <span class="sub">(${ts.length} sub-topics)</span></summary>
+   ${ts.map(t=>`<div class="topic-row">
+    <div class="topic-name"><b>${escapeHTML(t.name)}</b><small>Weight: ${t.weight}${t.lastReviewed?' · Last reviewed: '+new Date(t.lastReviewed).toLocaleDateString():''}</small></div>
+    <span class="badge ${t.status}">${label(t.status)}</span>
+    <select data-id="${t.id}">${['NotStarted','InProgress','Mastered','NeedsReview'].map(s=>`<option value="${s}" ${s===t.status?'selected':''}>${label(s)}</option>`).join('')}</select>
+   </div>`).join('')}
+  </details>`).join('') || '<p class="sub">No topics found.</p>';
+}
+
+function escapeHTML(value){
+ return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function readiness(){
+ let total=0,earned=0;
+ data.topics.forEach(t=>{
+   total+=Number(t.weight)||0;
+   if(t.status==='Mastered') earned+=Number(t.weight)||0;
+   if(t.status==='InProgress') earned+=(Number(t.weight)||0)*0.5;
+ });
+ return total?earned/total*100:0;
+}
+
+function leftDays(){
+ return data.examDate
+   ? Math.max(0,Math.ceil((new Date(data.examDate).getTime()-Date.now())/DAY))
+   : 365;
+}
+
+function priorityTopics(){
+ const d=leftDays();
+ return data.topics
+   .filter(t=>t.status!=='Mastered')
+   .map(t=>({...t,score:t.weight*(1/(d+1))}))
+   .sort((a,b)=>b.score-a.score);
+}
+
+function priorityHTML(items,full=false){
+ return items.slice(0,full?items.length:3).map((t,i)=>`<div class="priority">
+   <span class="rank">${i+1}</span><b>${escapeHTML(t.name)}</b>
+   <div class="sub" style="margin-left:34px">Weight: ${t.weight} · ${label(t.status)} · Score: ${t.score.toFixed(5)}</div>
+ </div>`).join('') || '<p class="sub">All topics are mastered.</p>';
+}
+
+function countdown(){
+ const els={d:document.getElementById('days'),h:document.getElementById('hours'),m:document.getElementById('mins'),s:document.getElementById('secs')};
+ if(!data.examDate){
+   els.d.textContent='--';els.h.textContent='--';els.m.textContent='--';els.s.textContent='--';return;
+ }
+ let diff=new Date(data.examDate).getTime()-Date.now();
+ if(diff<=0){
+   els.d.textContent='0';els.h.textContent='00';els.m.textContent='00';els.s.textContent='00';return;
+ }
+ const d=Math.floor(diff/DAY);diff%=DAY;
+ const h=Math.floor(diff/3600000);diff%=3600000;
+ const m=Math.floor(diff/60000);diff%=60000;
+ const sec=Math.floor(diff/1000);
+ els.d.textContent=d;els.h.textContent=String(h).padStart(2,'0');
+ els.m.textContent=String(m).padStart(2,'0');els.s.textContent=String(sec).padStart(2,'0');
+}
+
+function bindSelects(){
+ document.querySelectorAll('select[data-id]').forEach(select=>select.onchange=async()=>{
+   const t=data.topics.find(x=>String(x.id)===String(select.dataset.id));
+   if(!t)return;
+   t.status=select.value;
+   t.lastReviewed=select.value==='Mastered' ? new Date().toISOString() :
+                  select.value==='NotStarted' ? null : t.lastReviewed;
+   render();
+   await saveTopic(t);
+ });
+}
+
+function renderTopicMenu(){
+ const menu=document.getElementById('topicMenu');
+ menu.innerHTML=Object.keys(grouped()).map(sec=>`
+   <button type="button" class="nav-item topic-link" data-section="${escapeHTML(sec)}">› ${escapeHTML(sec.replace('Topic ','T'))}</button>
+ `).join('');
+ menu.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>showTopicSection(b.dataset.section));
+}
+
+function render(){
+ const changed=decay();
+ if(changed && currentSession) syncAllProgress().catch(console.error);
+ const r=readiness();
+ document.getElementById('ready').textContent=r.toFixed(1)+'%';
+ document.getElementById('bar').style.width=r+'%';
+ document.getElementById('topicsDashboard').innerHTML=topicHTML(data.topics);
+ document.getElementById('topicsAll').innerHTML=topicHTML(data.topics);
+ document.getElementById('priorityList').innerHTML=priorityHTML(priorityTopics());
+ document.getElementById('prioritiesFull').innerHTML=priorityHTML(priorityTopics(),true);
+ document.getElementById('examDate').value=data.examDate || '';
+ renderTopicMenu();
+ bindSelects();
+ countdown();
+}
+
+const titles={
+ dashboard:['Dashboard','Monitor your progress and prepare for the exam.'],
+ topics:['All Topics','Update the status of every syllabus sub-topic.'],
+ priorities:['Smart Priorities','Focus on the topics requiring the most attention.'],
+ settings:['Settings & Data','Manage saved progress and reset safely.']
+};
+
+function show(v){
+ Object.keys(titles).forEach(x=>document.getElementById(x+'View').classList.toggle('hidden',x!==v));
+ document.querySelectorAll('.nav-item[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
+ document.getElementById('pageTitle').textContent=titles[v][0];
+ document.getElementById('pageSub').textContent=titles[v][1];
+}
+
+function showTopicSection(section){
+ show('topics');
+ document.getElementById('pageTitle').textContent=section;
+ document.getElementById('pageSub').textContent='Update the status of the sub-topics in this syllabus section.';
+ document.querySelectorAll('#topicsAll .topic-section').forEach(el=>{
+   const title=el.querySelector('summary')?.textContent||'';
+   el.style.display=title.startsWith(section)?'':'none';
+ });
+}
+
+/* Cloudflare data and authentication */
+async function api(path,method='GET',body){
+ const response=await fetch('/api/'+path,{method,credentials:'same-origin',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});
+ let result;try{result=await response.json();}catch{throw new Error('The server could not be reached. Please try again.');}
+ if(!response.ok){if(response.status===401){currentSession=null;showAuth();}throw new Error(result.error||'Request failed.');}
+ return result;
+}
+let pendingSave=Promise.resolve();
+function queueSave(action){const next=pendingSave.then(action);pendingSave=next.catch(()=>{});return next;}
+function report(error){alert(error.message||'Could not save your changes.');}
+async function loadUserData(){
+ const state=await api('state');const progress=new Map(state.progress.map(p=>[p.topic_id,p]));
+ data=freshData();data.topics=data.topics.map(t=>{const p=progress.get(t.id);return p?{...t,status:p.status,lastReviewed:p.last_reviewed}:t;});
+ data.examDate=state.exam_date||'';
+}
+function topicPayload(t){return {topic_id:t.id,status:t.status,last_reviewed:t.lastReviewed};}
+async function saveTopic(topic){
+ if(!currentSession)return;const payload=topicPayload(topic);
+ try{await queueSave(()=>api('progress','PUT',{topics:[payload]}));}catch(e){report(e);}
+}
+async function syncAllProgress(){
+ if(!currentSession)return;const topics=data.topics.map(topicPayload);
+ await queueSave(()=>api('progress','PUT',{topics}));
+}
+async function saveExamDate(){
+ if(!currentSession)return;const exam_date=data.examDate;
+ try{await queueSave(()=>api('exam-date','PUT',{exam_date}));}catch(e){report(e);}
+}
+async function resetProgress(){
+ try{await queueSave(()=>api('state','DELETE'));data=freshData();render();show('dashboard');}catch(e){report(e);}
+}
+function showAuth(){document.getElementById('authScreen').style.display='flex';}
+function hideAuth(){document.getElementById('authScreen').style.display='none';}
+async function startAuthenticatedSession(session){
+ currentSession=session;
+ try{await loadUserData();document.getElementById('loggedUser').textContent='Logged in as: '+session.user.username;render();hideAuth();}
+ catch(e){currentSession=null;showAuth();throw e;}
+}
+document.querySelectorAll('.nav-item[data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view));
+document.getElementById('examDate').onchange=async()=>{data.examDate=document.getElementById('examDate').value;render();await saveExamDate();};
+document.getElementById('clearDate').onclick=async()=>{data.examDate='';render();await saveExamDate();};
+document.getElementById('resetBtn').onclick=()=>document.getElementById('modal').style.display='flex';
+document.getElementById('cancel').onclick=()=>document.getElementById('modal').style.display='none';
+document.getElementById('confirm').onclick=async()=>{document.getElementById('modal').style.display='none';await resetProgress();};
+for(const name of ['login','signup']){
+ document.getElementById(name+'Tab').onclick=()=>{
+  for(const n of ['login','signup']){
+   document.getElementById(n+'Form').classList.toggle('hidden',n!==name);
+   document.getElementById(n+'Tab').classList.toggle('active',n===name);
+  }
+ };
+ document.getElementById(name+'Form').onsubmit=async(e)=>{
+  e.preventDefault();const form=e.currentTarget,button=form.querySelector('button'),error=document.getElementById(name+'Error');
+  const username=document.getElementById(name+'User').value.trim(),password=document.getElementById(name+'Pass').value;
+  error.textContent='';
+  if(name==='signup'&&password!==document.getElementById('signupPass2').value){error.textContent='Passwords do not match.';return;}
+  button.disabled=true;
+  try{const result=await api(name,'POST',{username,password});await startAuthenticatedSession(result);form.reset();}
+  catch(e){error.textContent=e.message;}finally{button.disabled=false;}
+ };
+}
+document.getElementById('logoutBtn').onclick=async()=>{
+ try{await pendingSave;await api('logout','POST');currentSession=null;data=freshData();render();document.getElementById('loggedUser').textContent='';showAuth();}catch(e){report(e);}
+};
+async function init(){try{const session=await api('session');if(session.user)await startAuthenticatedSession(session);else showAuth();}catch(e){showAuth();document.getElementById('loginError').textContent=e.message;}}
+render();
+setInterval(()=>{countdown();if(currentSession&&decay()){render();syncAllProgress().catch(report);}},1000);
+init();
+
+</script>
+</body></html>

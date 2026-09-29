@@ -1,20 +1,29 @@
-# Exam Tracker — Cloudflare D1 edition
+# Exam Tracker — Cloudflare D1
 
-Files:
-- index.html — frontend
-- functions/api/* — Cloudflare Pages Functions API
-- functions/_lib.js — auth/database helpers
-- schema.sql — D1 schema
-- wrangler.jsonc — D1 binding configuration
+Сайт: https://examtrackerv10.vsevolod-k.workers.dev/
+База: userdb (6093c989-96e4-4d6c-8582-606142bfa3aa), привязка DB.
 
-Cloudflare binding name expected by the code: DB
-D1 database: userdb
+Регистрация и вход используют username и пароль. Пароли хранятся как scrypt-хеши с индивидуальной случайной солью (N=16384, r=8, p=5). Сессии действуют 7 дней и используют HttpOnly Secure SameSite=Strict cookie. В базе хранится только хеш токена сессии. Данные прогресса и даты доступны только владельцу аккаунта.
 
-Deployment:
-1. Run schema.sql in D1 Studio for userdb.
-2. Upload/commit all files to the GitHub repository root.
-3. Deploy the repository as a Cloudflare Pages project.
-4. In Pages Settings -> Bindings, confirm D1 binding variable DB points to userdb.
-5. Redeploy after adding/changing the binding.
+## Файлы
 
-The app stores password hashes, not plaintext passwords. Sessions use an HttpOnly Secure cookie.
+- worker.mjs — сервер и API.
+- page.html — интерфейс сайта.
+- wrangler.jsonc — настройки публикации Worker и D1.
+- schema.sql — создание таблиц без удаления существующих данных.
+
+## Обновление GitHub
+
+Рабочая версия опубликована напрямую в Cloudflare. Репозиторий https://github.com/VsevolodKorolkov/examtrackerv10 ещё не обновлён.
+
+Загрузите четыре файла из этого архива в корень репозитория, заменив одноимённые. Файл wrangler.jsonc обязательно заменить: старая конфигурация предназначалась для Pages, а этот проект работает как Worker. Команда публикации остаётся `npx wrangler deploy`. Build command можно оставить пустым.
+
+Старые файлы signup.js, login.js, _lib.js и другие Pages Functions новой конфигурацией не используются. schema.sql из этого архива не содержит DROP TABLE. Старый schema.sql, удаляющий пользователей, запускать нельзя.
+
+Текущие таблицы уже созданы. Для нового окружения можно выполнить `npx wrangler d1 execute userdb --remote --file=schema.sql`, затем `npx wrangler deploy`.
+
+## Ограничения
+
+Автоматическое восстановление забытого пароля и подтверждение email не реализованы. Username регистронезависимый, 3–64 символа: латинские буквы, цифры, точка, подчёркивание, @, +, дефис. Пароль: 15–128 символов.
+
+Дата экзамена хранится в том виде, как введена в поле (локальное время без часового пояса).

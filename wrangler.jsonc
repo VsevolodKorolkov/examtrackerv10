@@ -1,13 +1,27 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "examtracker",
+  "name": "examtrackerv10",
+  "main": "worker.mjs",
   "compatibility_date": "2026-09-29",
-  "pages_build_output_dir": ".",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "rules": [
+    {
+      "type": "Text",
+      "globs": [
+        "**/*.html"
+      ],
+      "fallthrough": true
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "userdb",
       "database_id": "6093c989-96e4-4d6c-8582-606142bfa3aa"
     }
-  ]
+  ],
+  "observability": {
+    "enabled": true
+  }
 }
